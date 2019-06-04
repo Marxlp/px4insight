@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<ULog global_parse="ordered">
+<ULog global_parse='ordered'>
     <header>
-        <filemagic>
+        <element>
+            <name>filemagic</name>
             <size>7</size>
-            <validvalue>554c6f6701</validvalue>
-        </filemagic>
-        <version>
+            <!--validvalue is in hex form, while two number stardand for a byte -->
+            <validvalue>554c6f67011235</validvalue>
+        </element>
+        <element>
+            <name>version</name>
             <size>1</size>
             <validvalue>01</validvalue>
-        </version>
-        <timestamp>
+        </element>
+        <element>
+            <name>timestamp</name>
             <dtype>uint64_t</dtype>
-            <size>8</size>
-            <value>unknown</value>
+            <size>1</size>
             <unit>ms</unit>
-        </timestamp>
+        </element>
     </header>
     <definitions parse='causal'>
         <message_header_s>
@@ -28,7 +31,7 @@
             </element>
         </message_header_s>
         <B alias='ulog_message_flag_bits_s'>
-            <include>message_header_s</include>
+            <include>.//message_header_s</include>
             <element>
                 <name>compat_flags</name>
                 <dtype>uint8_t</dtype>
@@ -46,16 +49,17 @@
             </element>
         </B>
         <F alias='message_format_s'>
-            <include>message_header_s</include>
+            <include>.//message_header_s</include>
             <element>
                 <name>format</name>
                 <size>
+                    <!-- 'left' denotes whether the value is calculate by subtracting sum of other element size from msg_size -->
                     <left>1</left>
                 </size>
             </element>
         </F>
         <I alias='message_info_s'>
-            <include>message_header_s</include>
+            <include>.//message_header_s</include>
             <element>
                 <name>key_len</name>
                 <dtype>uint8_t</dtype>
@@ -64,7 +68,7 @@
                 <name>key</name>
                 <dtype>char</dtype>
                 <size>
-                    <valueof>key_len</valueof>
+                    <valueof>.//I/*[name='key_len']</valueof>
                 </size>
             </element>
             <element>
@@ -76,7 +80,7 @@
             </element>
         </I>
         <M alias='ulog_message_info_multiple_header_s'>
-            <include>message_header_s</include>
+            <include>.//message_header_s</include>
             <element>
                 <name>is_continued</name>
                 <dtype>uint8_t</dtype>
@@ -89,7 +93,7 @@
                 <name>key</name>
                 <dtype>char</dtype>
                 <size>
-                    <valueof>key_len</valueof>
+                    <valueof>.//M/*[name='key_len']</valueof>
                 </size>
             </element>
             <element>
@@ -100,10 +104,31 @@
                 </size>
             </element>
         </M>
+        <P>
+            <include>.//message_header_s</include>
+            <element>
+                <name>key_len</name>
+                <dtype>uint8_t</dtype>
+            </element>
+            <element>
+                <name>key</name>
+                <dtype>char</dtype>
+                <size>
+                    <valueof>.//P/*[name='key_len']</valueof>
+                </size>
+            </element>
+            <element>
+                <name>value</name>
+                <dtype>
+                    <valueof>.//P/*[name='key']</valueof>
+                </dtype>
+                <size>1</size>
+            </element>
+        </P>
     </definitions>
-    <data_section parse='causal'>
+    <datasection parse='causal'>
         <A alias='message_add_logged_s'>
-            <include>definitions.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>multi_id</name>
                 <dtype>uint8_t</dtype>
@@ -121,14 +146,14 @@
             </element>
         </A>
         <R alias='message_remove_logged_s'>
-            <include>definitions.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>msg_id</name>
                 <dtype>uint16_t</dtype>
             </element>
         </R>
         <D alias='message_data_s'>
-            <include>definitioons.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>msg_id</name>
                 <dtype>uint16_t</dtype>
@@ -136,10 +161,13 @@
             <element>
                 <name>data</name>
                 <dtype>uint8_t</dtype>
+                <size>
+                    <left>1</left>
+                </size>
             </element>
         </D>
         <L alias='message_logging_s'>
-            <include>definitions.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>log_level</name>
                 <dtype>uint8_t</dtype>
@@ -157,7 +185,7 @@
             </element>
         </L>
         <S alias='message_sync_s'>
-            <include>definitions.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>sync_magic</name>
                 <dtype>uint8_t</dtype>
@@ -165,14 +193,14 @@
             </element>
         </S>
         <O alias='message_dropout_s'>
-            <include>definitions.msg_header_s</include>
+            <include>.//definitions/message_header_s</include>
             <element>
                 <name>duration</name>
                 <dtype>uint16_t</dtype>
             </element>
         </O>
-        <include>definitions.I</include>
-        <include>definitions.M</include>
-        <include>definitions.P</include>
-    </data_section>
+        <include>.//definitions/I</include>
+        <include>.//definitions/M</include>
+        <include>.//definitions/P</include>
+    </datasection>
 </ULog>
